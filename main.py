@@ -3,16 +3,23 @@ from src.markdown_to_html import markdown_to_html_node
 import os
 import shutil
 import logging
+import sys
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
+if len(sys.argv) > 1:
+    basepath = sys.argv[1]
+else:
+    basepath = "/"
+
 
 def copy_static_to_public():
     """
     Copy static files from the static directory to the public directory.
     """
     static_dir = os.path.join(os.path.dirname(__file__), "static")
-    public_dir = os.path.join(os.path.dirname(__file__), "public")
+    public_dir = os.path.join(os.path.dirname(__file__), "docs")
 
     if os.path.exists(public_dir):
         shutil.rmtree(public_dir)
@@ -70,6 +77,7 @@ def generate_page(from_path, template_path, dest_path):
     html_node = markdown_to_html_node(content)
     page_content = html_node.to_html()
     html_content = template.replace("{{ Title }}", title).replace("{{ Content }}", page_content)
+    html_content = html_content.replace('href="/"', f'href="{basepath}"').replace('src="/"', f'src="{basepath}"')
 
     with open(dest_path, "w") as f:
         f.write(html_content)
@@ -96,10 +104,16 @@ def generate_pages_recursive(dir_path_content, template_path, dest_path_dir):
 
 
 def main():
-    shutil.rmtree("public", ignore_errors=True)
+    output_dir = "docs"  # Changed from "public"
+    if os.path.exists(output_dir):
+        shutil.rmtree(output_dir)
+    os.makedirs(output_dir, exist_ok=True)
+    
     copy_static_to_public()
-    print("Static files copied to public directory.")
-    generate_pages_recursive("content", "template.html", "public")
+    print("Static files copied to docs directory.")
+    generate_pages_recursive("content", "template.html", output_dir)
+
+    
 
 
 
