@@ -1,4 +1,5 @@
-from src import *
+from src.markdown_to_html import markdown_to_html_node
+
 import os
 import shutil
 import logging
@@ -40,14 +41,65 @@ def copy_recursive(src, dst):
 
 
 
+def extract_title(markdown):
+    """
+    Extract the title from the markdown file.
+    """
+    with open(markdown, "r") as f:
+        lines = f.readlines()
+        for line in lines:
+            if line.startswith("# "):
+                return line[2:].strip()
+    raise ValueError("No title found in the markdown file.")
 
+def generate_page(from_path, template_path, dest_path):
+    """
+    Generate a page from a markdown file using a template.
+    """
+    print(f"Generating page from {from_path} using template {template_path} to {dest_path}")
+
+    with open(from_path, "r") as f:
+        content = f.read()
+
+    title = extract_title(from_path)
+
+    with open(template_path, "r") as f:
+        template = f.read()
+
+
+    html_node = markdown_to_html_node(content)
+    page_content = html_node.to_html()
+    html_content = template.replace("{{ Title }}", title).replace("{{ Content }}", page_content)
+
+    with open(dest_path, "w") as f:
+        f.write(html_content)
+        logging.info(f"Generated page: {dest_path}")
+
+
+def generate_pages_recursive(dir_path_content, template_path, dest_path_dir):
+    """
+    Recursively generate pages from markdown files in a directory.
+    """
+    if not os.path.exists(dest_path_dir):
+        os.mkdir(dest_path_dir)
+        logging.info(f"Created directory: {dest_path_dir}")
+
+    for item in os.listdir(dir_path_content):
+        src_item = os.path.join(dir_path_content, item)
+        dest_item = os.path.join(dest_path_dir, item)
+
+        if os.path.isdir(src_item):
+            generate_pages_recursive(src_item, template_path, dest_item)
+        elif item.endswith(".md"):
+            generate_page(src_item, template_path, dest_item.replace(".md", ".html"))
 
 
 
 def main():
-
+    shutil.rmtree("public", ignore_errors=True)
     copy_static_to_public()
     print("Static files copied to public directory.")
+    generate_pages_recursive("content", "template.html", "public")
 
 
 

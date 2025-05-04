@@ -40,6 +40,22 @@ class LeafNode(HTMLNode):
         super().__init__(tag=tag, value=value, children=None, props=props)
 
     def to_html(self):
+        #Debugging statement
+        print(f"LeafNode to_html called with tag={self.tag}, value={self.value}")
+            # Check if value is None or empty
+        if not self.value:
+            print(f"ERROR: LeafNode with tag={self.tag} has None/empty value")
+            raise ValueError("LeafNode must have a value")
+        
+        # Special case for img tags - they're self-closing
+        if self.tag == "img":
+            props_str = self.props_to_html()
+            return f"<{self.tag} {props_str}>"
+        
+        # For all other tags, require a value
+        if not self.value and self.value != "":
+            raise ValueError(f"LeafNode with tag {self.tag} must have a value")
+              
         # Check if value is None or empty
         if not self.value:
           raise ValueError("LeafNode must have a value")

@@ -1,8 +1,8 @@
-from markdown_to_block import markdown_to_blocks
-from blocktypes import block_to_blocktype, BlockType
-from htmlnode import HTMLNode, LeafNode, ParentNode
-from text_to_textnodes import text_to_textnodes
-from textnode import text_node_to_html_node, TextNode, TextType
+from .markdown_to_block import markdown_to_blocks
+from .blocktypes import block_to_blocktype, BlockType
+from .htmlnode import HTMLNode, LeafNode, ParentNode
+from .text_to_textnodes import text_to_textnodes
+from .textnode import text_node_to_html_node, TextNode, TextType
 
 
 
@@ -39,11 +39,11 @@ def markdown_to_html_node(markdown):
             content = block[heading_level:].strip()
             
             # Create the heading node
-            heading_node = LeafNode(f"h{heading_level}", content)
+            heading_node = ParentNode(f"h{heading_level}", None)
             heading_node.children = text_to_children(content)
             children.append(heading_node)
         elif block_type == BlockType.PARAGRAPH:
-            para_node = LeafNode("p", None)
+            para_node = ParentNode("p", None)
             para_node.children = text_to_children(block)
             children.append(para_node)
 
@@ -67,7 +67,7 @@ def markdown_to_html_node(markdown):
             
             # Create the code node and pre node structure
             pre_node = ParentNode("pre", None)
-            code_node = LeafNode("code", None)
+            code_node = ParentNode("code", [])
             code_node.children = [code_html_node]
             pre_node.children = [code_node]
             children.append(pre_node)
@@ -92,9 +92,9 @@ def markdown_to_html_node(markdown):
             # Split the block by lines and process each line as a list item
             for line in block.split('\n'):
                 line = line.strip()
-                if line.startswith('* '):  # Assuming unordered list items start with "* "
+                if line.startswith('- '):  # Assuming unordered list items start with "* "
                     item_content = line[2:].strip()  # Remove the "* " prefix
-                    li_node = HTMLNode("li", None)
+                    li_node = ParentNode("li", [])
                     li_node.children = text_to_children(item_content)
                     list_items.append(li_node)
             
@@ -114,7 +114,7 @@ def markdown_to_html_node(markdown):
                     while i < len(line) and (line[i].isdigit() or line[i] == '.'):
                         i += 1
                     item_content = line[i:].strip()  # Get content after the number and dot
-                    li_node = HTMLNode("li", None)
+                    li_node = ParentNode("li", [])
                     li_node.children = text_to_children(item_content)
                     list_items.append(li_node)
             

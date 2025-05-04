@@ -1,8 +1,8 @@
 
-from textnode import *
-from split_node import *
-from extract_markdown import *
-from inline_markdown import split_nodes_delimiter
+from .textnode import *
+from .split_node import *
+from .extract_markdown import *
+from .inline_markdown import split_nodes_delimiter
 
 def text_to_textnodes(text):
     """
