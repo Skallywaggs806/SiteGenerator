@@ -1,4 +1,4 @@
 #Static Site Generator
 
 
-Times i used a fake  commit to keep my streak: 8
+Times i used a fake  commit to keep my streak: 9
